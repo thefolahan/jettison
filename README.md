@@ -83,3 +83,7 @@ lib/Common.ps1    console output, catalog loading, journal storage
 ```
 
 Requires Windows PowerShell 5.1 or later, which ships with Windows 10 and 11.
+
+## License
+
+[MIT](LICENSE)
