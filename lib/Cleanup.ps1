@@ -1,18 +1,13 @@
-# Disk cleanup. Only files older than the catalog's minAgeHours are touched, so anything a
-# running installer or app wrote recently is left alone. Deleted files are not recoverable.
-
 function Get-JtCleanupFiles {
     param($Entry)
     $root = [Environment]::ExpandEnvironmentVariables($Entry.path)
-    # Some system folders cannot even be probed without elevation; treat those as empty.
+
     if (-not (Test-Path -LiteralPath $root -ErrorAction SilentlyContinue)) { return @() }
     $cutoff = (Get-Date).AddHours(-[double]$Entry.minAgeHours)
     @(Get-ChildItem -LiteralPath $root -Recurse -File -Force -ErrorAction SilentlyContinue |
         Where-Object { $_.LastWriteTime -lt $cutoff })
 }
 
-# Returns one record per cleanup target. With -Apply the files are deleted and Bytes is what
-# was actually freed; without it Bytes is what could be freed.
 function Invoke-JtCleanup {
     param($Catalog, [switch]$Apply)
     foreach ($entry in $Catalog.cleanup) {
@@ -36,7 +31,7 @@ function Invoke-JtCleanup {
                     $bytes += $size
                     $count++
                 }
-                catch { }   # in use or access denied: skip it
+                catch { }
             }
             else {
                 $bytes += $file.Length

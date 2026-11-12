@@ -1,8 +1,5 @@
-# Point-in-time measurements of the machine. Taken before and after so the report shows
-# measured differences rather than estimates.
-
 function Get-JtLastBootMs {
-    # Windows logs how long each boot took (event 100). The log needs elevation to read.
+
     try {
         $record = Get-WinEvent -LogName 'Microsoft-Windows-Diagnostics-Performance/Operational' `
             -FilterXPath '*[System[EventID=100]]' -MaxEvents 1 -ErrorAction Stop
@@ -29,7 +26,6 @@ function Get-JtMetrics {
     }
 }
 
-# Rows for the before/after table. LowerIsBetter decides which direction counts as a win.
 function Get-JtMetricRows {
     param($Before, $After)
     $defs = @(

@@ -1,5 +1,3 @@
-# Writes a self-contained HTML report (no external assets) and returns its path.
-
 function ConvertTo-JtHtml {
     param($Text)
     return [System.Net.WebUtility]::HtmlEncode([string]$Text)

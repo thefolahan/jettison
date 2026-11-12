@@ -1,5 +1,3 @@
-# Shared helpers: console output, elevation check, catalog loading, journal storage.
-
 $script:JtTierRank = @{ Safe = 1; Balanced = 2; Aggressive = 3 }
 
 function Write-JtHead {
@@ -27,7 +25,6 @@ function Format-JtBytes {
     return '{0:N0} KB' -f ($Bytes / 1KB)
 }
 
-# Loads catalog.json, rejects malformed entries, and keeps only the entries at or below $Level.
 function Get-JtCatalog {
     param([string]$Path, [string]$Level)
 
@@ -63,7 +60,6 @@ function Save-JtJournal {
     return $path
 }
 
-# Newest journal that has not been reverted yet, or $null.
 function Get-JtLatestJournal {
     param([string]$StateDir)
     if (-not (Test-Path -LiteralPath $StateDir)) { return $null }

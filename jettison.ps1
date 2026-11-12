@@ -1,20 +1,3 @@
-<#
-.SYNOPSIS
-    Jettison - measure, debloat and tune a Windows 10/11 PC, with an undo journal.
-
-.DESCRIPTION
-    Analyze  (default) Read-only. Shows what would change and the current score.
-    Apply    Removes bloatware, applies tweaks, disables telemetry services/tasks, cleans disk.
-             Needs an elevated shell. Records every change in a journal.
-    Measure  Re-measures against the last Apply. Run it after a reboot for honest numbers.
-    Revert   Undoes the registry, service and task changes of the last Apply.
-
-.EXAMPLE
-    .\jettison.ps1
-    .\jettison.ps1 -Mode Apply -Level Balanced
-    .\jettison.ps1 -Mode Apply -Skip Apps,Cleanup -Yes
-    .\jettison.ps1 -Mode Revert
-#>
 [CmdletBinding()]
 param(
     [ValidateSet('Analyze', 'Apply', 'Measure', 'Revert')]
@@ -23,8 +6,6 @@ param(
     [ValidateSet('Safe', 'Balanced', 'Aggressive')]
     [string]$Level = 'Safe',
 
-    # Apps, Tweaks, Services, Tasks, Cleanup. Checked below rather than with ValidateSet,
-    # because "powershell -File" passes "Apps,Cleanup" as one string, not an array.
     [string[]]$Skip = @(),
 
     [switch]$Yes,
@@ -252,7 +233,7 @@ switch ($Mode) {
             Write-Host "  $($result.Failed) changes could not be reverted. The journal was kept: $($journal.File)" -ForegroundColor Red
             exit 1
         }
-        # Mark the journal as used so a second Revert moves on to the run before it.
+
         Rename-Item -LiteralPath $journal.File -NewName ((Split-Path $journal.File -Leaf) -replace '^journal-', 'reverted-')
         Write-Host '  Done. Reboot for service changes to take full effect.'
     }

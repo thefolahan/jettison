@@ -1,8 +1,3 @@
-# Turns the catalog into a list of plan items, each with the state it is in on this machine:
-#   Pending   - the optimization applies and has not been done
-#   Optimized - already in the target state
-#   Absent    - the app / service / task does not exist here, so there is nothing to do
-
 function New-JtItem {
     param($Kind, $Id, $Label, $Tier, $State, $Detail, $Data, [int]$Weight = 1)
     [pscustomobject]@{
@@ -30,7 +25,6 @@ function Test-JtProtected {
 function Get-JtAppItems {
     param($Catalog, [bool]$IsAdmin)
 
-    # -AllUsers needs elevation; without it we only see the current user's packages.
     if ($IsAdmin) { $installed = @(Get-AppxPackage -AllUsers -ErrorAction SilentlyContinue) }
     else { $installed = @(Get-AppxPackage -ErrorAction SilentlyContinue) }
 
@@ -119,9 +113,6 @@ function Get-JtPlan {
     return $items
 }
 
-# Score = share (by weight) of the optimizations that applied to this machine at baseline
-# and are now done. Things that were never here (Absent at baseline) are left out of both
-# sides, so a clean machine is not rewarded for bloat it never had.
 function Get-JtScore {
     param($Baseline, $Current)
     $now = @{}
@@ -139,7 +130,6 @@ function Get-JtScore {
     return [math]::Round(100.0 * $done / $total, 1)
 }
 
-# The slice of a plan that is safe to write to the journal (no live package objects).
 function ConvertTo-JtPlanRecord {
     param($Plan)
     @($Plan | Select-Object Kind, Key, Label, Tier, State, Detail, Weight, Result, Error)

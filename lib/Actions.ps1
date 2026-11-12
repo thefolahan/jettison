@@ -1,6 +1,3 @@
-# Applies plan items and records what was changed so Revert can put it back.
-# Every Invoke-Jt* function returns the change records for the journal and throws on failure.
-
 function Invoke-JtApp {
     param($Item, $Provisioned)
     $changes = @()
@@ -8,7 +5,7 @@ function Invoke-JtApp {
         Remove-AppxPackage -Package $pkg.PackageFullName -AllUsers -ErrorAction Stop
         $changes += @{ Kind = 'App'; Name = $pkg.Name; PackageFullName = $pkg.PackageFullName }
     }
-    # Also drop the provisioned copy, otherwise Windows reinstalls it for every new user.
+
     foreach ($prov in @($Provisioned | Where-Object { $_.DisplayName -like $Item.Data.Pattern })) {
         Remove-AppxProvisionedPackage -Online -PackageName $prov.PackageName -ErrorAction Stop | Out-Null
     }
@@ -17,7 +14,7 @@ function Invoke-JtApp {
 
 function Set-JtRegistryValue {
     param([string]$Path, [string]$Name, $Value, [string]$Type)
-    # New-Item -Force would wipe an existing key, so only create it when it is missing.
+
     if (-not (Test-Path -LiteralPath $Path)) {
         New-Item -Path $Path -Force -ErrorAction Stop | Out-Null
     }
@@ -48,7 +45,7 @@ function Invoke-JtService {
         WasDelayed = ($delayed -eq 1)
     }
     Set-Service -Name $name -StartupType Disabled -ErrorAction Stop
-    # A service that refuses to stop is still disabled from the next boot, so that is not a failure.
+
     Stop-Service -Name $name -Force -ErrorAction SilentlyContinue -WarningAction SilentlyContinue
     return $change
 }
@@ -59,7 +56,6 @@ function Invoke-JtTask {
     return @{ Kind = 'Task'; TaskPath = $Item.Data.TaskPath; TaskName = $Item.Data.TaskName }
 }
 
-# Runs every Pending item. Sets Result/Error on each item and returns the journal change records.
 function Invoke-JtPlan {
     param($Plan)
     $changes = @()
@@ -90,8 +86,6 @@ function Invoke-JtPlan {
     return $changes
 }
 
-# Undoes the registry, service and task changes in a journal, newest first.
-# Removed apps cannot be restored offline; they are listed so they can be reinstalled.
 function Undo-JtChanges {
     param($Changes)
     $failed = 0
